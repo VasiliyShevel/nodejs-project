@@ -1,34 +1,37 @@
 const  mongoose = require('mongoose');
 
-const User = require('../documents/user');
+const User = require('../../documents/user');
 
-describe('Test mongoDB user model', function() {
+describe('Test user document', function() {
 
-  before(
-    mongoose.connect('mongodb://localhost/generated_data')
-  );
+  beforeAll((done) => {
+    mongoose.connect('mongodb://localhost/test_data', {
+      useMongoClient: true,
+    });
+    mongoose.connection.once('open', () => {
+      done();
+    })
+  });
 
-  // beforeEach(testUtils.clear);
+  test('should create a new User', (done) => {
 
-  describe('create new User', function() {
-    it('should create a new Example', function(done) {
+    const newUser = new User({
+      firstName: 'John',
+      lastName: 'Doe',
+      job: 'Driver',
+      phone: '+61 333 3333'
+    });
 
-      const newUser = new User({
-        firstName: 'John',
-        lastName: 'Doe',
-        job: 'Driver',
-        phone: '+61 333 3333'
-      });
-
-      newUser.save(function(err, result) {
-        expect(result.firstName).toBe('John');
-        done();
-      });
+    newUser.save((err, user) => {
+      expect(user.firstName).toBe('John');
+      done();
     });
   });
 
-  after(
-    mongoose.disconnect()
-  );
+  afterAll((done) => {
+    mongoose.disconnect(() => {
+      done();
+    });
+  });
 
 });

@@ -19,7 +19,9 @@ const actions = {
 
       const csv = json2csv({ data: result, fields: fields });
       const fileName = Math.random().toString(36);
+
       fs.writeFile(`./data/${fileName}.csv`, csv, function(err) {
+        console.log(fs.accessSync(`./data/${fileName}.csv`));
         if (err) reject(err);
         resolve();
       });
