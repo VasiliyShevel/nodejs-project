@@ -1,13 +1,13 @@
 const fileImportService = require('../../services/file-import');
 
 const save = (req, res) => {
-  const data = req.file;
-  fileImportService.save(data).then(() => {
+  fileImportService.save(req).then(() => {
     res.send({
       status: 'ok',
     });
   }).catch((err) => {
-    console.log(err);
+    res.status(400);
+    res.send(err);
   });
 };
 

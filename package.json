@@ -22,10 +22,13 @@
     "mysql": "^2.14.1",
     "sequelize": "^3.0.0",
     "sequelize-cli": "^3.0.0-3",
+    "streamifier": "^0.1.1",
     "tmp": "0.0.33"
   },
   "devDependencies": {
     "cross-env": "^5.0.5",
-    "nodemon": "^1.12.1"
+    "jest": "^21.2.1",
+    "nodemon": "^1.12.1",
+    "supertest": "^3.0.0"
   }
 }

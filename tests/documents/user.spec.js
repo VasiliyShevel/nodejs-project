@@ -13,6 +13,12 @@ describe('Test user document', function() {
     })
   });
 
+  afterAll((done) => {
+    mongoose.disconnect(() => {
+      done();
+    });
+  });
+
   test('should create a new User', (done) => {
 
     const newUser = new User({
@@ -24,12 +30,6 @@ describe('Test user document', function() {
 
     newUser.save((err, user) => {
       expect(user.firstName).toBe('John');
-      done();
-    });
-  });
-
-  afterAll((done) => {
-    mongoose.disconnect(() => {
       done();
     });
   });

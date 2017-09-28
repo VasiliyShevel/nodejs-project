@@ -8,23 +8,26 @@ const actions = {
       const result = [];
       const fields = ['firstName', 'lastName', 'phone', 'job'];
 
-      for (let i = 0; i < data.rows; i++) {
-        const firstName = faker.name.firstName();
-        const lastName = faker.name.lastName();
-        const phone = faker.phone.phoneNumber();
-        const job = faker.name.jobTitle();
+      if (data.rows) {
+        for (let i = 0; i < data.rows; i++) {
+          const firstName = faker.name.firstName();
+          const lastName = faker.name.lastName();
+          const phone = faker.phone.phoneNumber();
+          const job = faker.name.jobTitle();
 
-        result.push({firstName, lastName, phone, job});
+          result.push({firstName, lastName, phone, job});
+        }
+
+        const csv = json2csv({ data: result, fields: fields });
+        const fileName = Math.random().toString(36);
+
+        fs.writeFile(`./data/${fileName}.csv`, csv, function(err) {
+          if (err) reject(err);
+          resolve();
+        });
+      } else {
+        reject('Bad request');
       }
-
-      const csv = json2csv({ data: result, fields: fields });
-      const fileName = Math.random().toString(36);
-
-      fs.writeFile(`./data/${fileName}.csv`, csv, function(err) {
-        console.log(fs.accessSync(`./data/${fileName}.csv`));
-        if (err) reject(err);
-        resolve();
-      });
     })
   },
 };

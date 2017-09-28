@@ -1,21 +1,23 @@
 const fs = require('fs');
 const csv = require('csv');
 const tmp = require('tmp');
+const streamifier = require('streamifier');
 
 const mysqlDb = require('./../../models');
 const mongoDbUser = require('./../../documents/user');
 const mysqlUser = mysqlDb.user;
 
 const actions = {
-  save(file) {
+  save(req) {
     return new Promise((resolve, reject) => {
       tmp.file({postfix: '.csv', keep: true}, (err, path, fd, cleanupCallback) => {
         if (err) throw err;
 
-        const buffer = new Buffer(file.buffer);
+        if (req.file && req.file.buffer) {
+          const data = streamifier.createReadStream(req.file.buffer);
+          const writeStream = fs.createWriteStream(path);
+          const readStream = fs.createReadStream(path);
 
-        fs.writeFile(path, buffer, () => {
-          const inputFile = fs.createReadStream(path);
           const parser = csv.parse({
             columns: true
           });
@@ -35,7 +37,7 @@ const actions = {
               })
               .catch((err) => {
                 throw new Error(err);
-              })
+              });
 
             // save to mongoDB
             let user = new mongoDbUser(data);
@@ -48,19 +50,25 @@ const actions = {
             })
           });
 
-          inputFile.pipe(parser).pipe(transform);
+          data.pipe(writeStream);
+          readStream.pipe(parser).pipe(transform);
 
-          inputFile.on('end', () => {
+          writeStream.on('error', (err) => {
+            reject(err);
+            cleanupCallback();
+          });
+
+          readStream.on('error', (err) => {
+            reject(err);
+            cleanupCallback();
+          }).on('end', () => {
             resolve();
             cleanupCallback();
           });
-          inputFile.on('error', (err) => {
-            reject(err);
-            cleanupCallback();
-          })
-        });
+        } else {
+          reject('File not found')
+        }
       });
-
     });
   },
 };
