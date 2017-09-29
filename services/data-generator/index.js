@@ -1,14 +1,19 @@
 const faker = require('faker');
-const json2csv = require('json2csv');
+const csv = require('fast-csv');
 const fs = require('fs');
+
+const config = require('../../config/app')
 
 const actions = {
   generateFile(data) {
     return new Promise((resolve, reject) => {
       const result = [];
-      const fields = ['firstName', 'lastName', 'phone', 'job'];
+      const fileName = Math.random().toString(36);
+      const filepath = `${config.filesDir}/${fileName}.csv`;
 
       if (data.rows) {
+        const fileStream = fs.createWriteStream(filepath);
+
         for (let i = 0; i < data.rows; i++) {
           const firstName = faker.name.firstName();
           const lastName = faker.name.lastName();
@@ -18,13 +23,17 @@ const actions = {
           result.push({firstName, lastName, phone, job});
         }
 
-        const csv = json2csv({ data: result, fields: fields });
-        const fileName = Math.random().toString(36);
+        csv.write(result, {
+          headers: true
+        })
+        .pipe(fileStream);
 
-        fs.writeFile(`./data/${fileName}.csv`, csv, function(err) {
-          if (err) reject(err);
+        fileStream.on('error', (err) => {
+          reject(err);
+        }).on('close', () => {
           resolve();
         });
+
       } else {
         reject('Bad request');
       }

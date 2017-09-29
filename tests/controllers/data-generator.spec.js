@@ -11,8 +11,8 @@ describe('Test data generator API', () => {
     });
   });
 
-  beforeAll(() => {
-    server.close();
+  afterAll((done) => {
+    server.close(done);
   });
 
   describe('test POST /generateData', () => {

@@ -1,19 +1,22 @@
 const faker = require('faker');
-const json2csv = require('json2csv');
+const csv = require('fast-csv');
 const fs = require('fs');
+
+const filePath = __dirname + '/data';
 
 describe('Test csv file creation', () => {
   const fileName = 'test';
 
   beforeEach((done) => {
-    fs.unlink(`./data/${fileName}.csv`, () => {
+    fs.unlink(`${filePath}/${fileName}.csv`, () => {
       done();
     });
   });
 
   it('Should create a new csv file', (done) => {
     const result = [];
-    const fields = ['firstName', 'lastName', 'phone', 'job'];
+
+    const fileStream = fs.createWriteStream(`${filePath}/${fileName}.csv`);
 
     for (let i = 0; i < 10; i++) {
       const firstName = faker.name.firstName();
@@ -24,10 +27,13 @@ describe('Test csv file creation', () => {
       result.push({firstName, lastName, phone, job});
     }
 
-    const csv = json2csv({ data: result, fields: fields });
+    csv.write(result, {
+      headers: true
+    })
+      .pipe(fileStream);
 
-    fs.writeFile(`./data/${fileName}.csv`, csv, () => {
-      fs.stat(`./data/${fileName}.csv`, (err, stat) => {
+    fileStream.on('close', () => {
+      fs.stat(`${filePath}/${fileName}.csv`, (err, stat) => {
         expect(Boolean(stat)).toBe(true);
         done();
       });

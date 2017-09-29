@@ -12,8 +12,8 @@ describe('Test file import API', () => {
     });
   });
 
-  beforeAll(() => {
-    server.close();
+  afterAll((done) => {
+    server.close(done);
   });
 
   describe('test POST /fileImport', () => {
